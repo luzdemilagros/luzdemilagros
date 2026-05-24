@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luz de Milagros — Velas Artesanales & Regalos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0C0C0C;
+  --cream: #F0EDE6;
+  --rose: #E8748A;
+  --rose2: #FF3CAC;
+  --gold: #D4A853;
+  --gold2: #FFC94A;
+  --violet: #7B2FBE;
+  --violet2: #C77DFF;
+  --text: #EDE4D0;
+  --muted: rgba(237,228,208,0.55);
+  --border: rgba(232,116,138,0.2);
+  --white: #FAF8F4;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+html, body, #root {
+  background: var(--bg);
+}
+body {
+  font-family:'Kanit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor {
+  position:fixed; top:0; left:0; z-index:9999;
+  width:10px; height:10px;
+  background:var(--rose);
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  transition:transform .08s, width .2s, height .2s, background .2s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position:fixed; top:0; left:0; z-index:9998;
+  width:36px; height:36px;
+  border:1.5px solid rgba(232,116,138,0.6);
+  border-radius:50%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  transition:transform .18s ease-out, width .2s, height .2s;
+}
+body:hover .cursor { opacity:1; }
+
+/* NOISE OVERLAY */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  pointer-events:none;
+  opacity:0.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;
+  background-size:200px;
+}
+
+/* Scrolled state for hero topbar — sticky nav after hero */
+.sticky-nav {
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 clamp(1.2rem,4vw,3.5rem); height:60px;
+  background:rgba(12,12,12,0.92); backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(232,116,138,.1);
+  transform:translateY(-100%);
+  transition:transform .3s ease;
+}
+.sticky-nav.visible { transform:translateY(0); }
+.sticky-nav a {
+  color:var(--muted); font-size:10.5px; letter-spacing:.15em;
+  text-decoration:none; text-transform:uppercase; font-weight:500;
+  transition:color .2s;
+}
+.sticky-nav a:hover { color:var(--cream); }
+
+/* ════════════════════════════════════════════
+   HERO — Exact Jack-style architecture
+   Layer order (bottom → top):
+   1. #0C0C0C background
+   2. SVG blob shapes (solid dark, corners)
+   3. Radial warm glow (center)
+   4. Sparks
+   5. Topbar nav (z:20)
+   6. h1 TITLE — massive, bleeds edges (z:6)
+   7. CANDLE figure — on top of title (z:15)
+   8. Bottom bar text + CTA (z:20)
+   ════════════════════════════════════════════ */
+.hero {
+  height: 100vh;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  background: #080808;
+}
+
+/* Blobs y glow eliminados — fondo plano como Jack's hero */
+.blob, .hero-glow, .hero-sparks { display: none; }
+
+
+
+/* ── Topbar nav — z=20, always on top ── */
+.hero-topbar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: clamp(1rem,2.5vw,1.8rem) clamp(1.5rem,4.5vw,4rem);
+  opacity: 0;
+  animation: fadeUp .6s 0.05s forwards;
+}
+.hero-nav-link {
+  color: rgba(237,228,208,0.92);
+  font-size: clamp(.75rem,1.15vw,1rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  text-decoration: none;
+  transition: color .2s;
+}
+.hero-nav-link:hover { color: #fff; }
+
+/* ── TITLE — fits full width, uniform weight/style ── */
+.hero-heading-wrap {
+  position: absolute;
+  z-index: 6;
+  left: 0; right: 0;
+  top: clamp(48px, 9vh, 100px);
+  pointer-events: none;
+  overflow: visible;
+  text-align: center;
+}
+.hero-h1 {
+  /* Size tuned so all 3 words fit on one line with slight bleed */
+  font-size: clamp(10vw, 11.5vw, 13vw);
+  font-weight: 900;
+  font-style: normal;        /* NO italic anywhere */
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: .88;
+  white-space: nowrap;
+  display: inline-block;
+  /* Uniform silver/steel gradient — same on every word */
+  background: linear-gradient(180deg,
+    #5A6068 0%,
+    #9BAAB4 18%,
+    #C8D8E2 38%,
+    #E2EDF2 50%,
+    #C0CCCF 66%,
+    #8A9AA0 82%,
+    #606870 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0;
+  animation: titleReveal 1s 0.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes titleReveal {
+  from { opacity:0; transform: translateY(36px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* "MILAGROS" — same weight/style as the rest,
+   only color is different (warm rose→gold) */
+.hero-h1 .word-milagros {
+  font-style: normal;
+  font-weight: 900;
+  background: linear-gradient(135deg,
+    #E8748A 0%,
+    #F0956A 35%,
+    #FFC94A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* (candle figure removed) */
+
+/* ── Hero 3D figure ── */
+.hero-figure {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+  width: clamp(260px, 38vw, 560px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.hero-figure-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  animation: heroFloat 5s ease-in-out infinite;
+  filter: drop-shadow(0 30px 60px rgba(232,116,138,0.35)) drop-shadow(0 0 80px rgba(123,47,190,0.2));
+}
+@keyframes heroFloat {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-22px); }
+}
+
+/* ── Bottom bar — z=20 ── */
+.hero-bottom {
+  position: absolute;
+  bottom: clamp(1.4rem, 3.5vw, 2.5rem);
+  left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 clamp(1.5rem,4.5vw,4rem);
+  opacity: 0;
+  animation: fadeUp .8s 0.85s forwards;
+}
+.hero-bottom-text {
+  font-size: clamp(.75rem, 1.4vw, 1rem);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: rgba(237,228,208,0.85);
+  line-height: 1.65;
+  max-width: clamp(160px, 20vw, 260px);
+}
+.hero-cta-btn {
+  background: linear-gradient(123deg, #18011F 7%, #B600A8 37%, #7621B0 72%, #BE4C00 100%);
+  color: #fff;
+  padding: clamp(11px,1.4vw,16px) clamp(26px,3.8vw,48px);
+  border-radius: 100px;
+  font-size: clamp(.62rem,1vw,.8rem);
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: transform .25s, box-shadow .25s;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 4px rgba(181,1,167,.3), inset 4px 4px 14px #7721B1;
+  white-space: nowrap;
+}
+.hero-cta-btn:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 10px 36px rgba(182,0,168,.65), inset 4px 4px 14px #7721B1;
+}
+
+/* Legacy button styles kept for other sections */
+.btn-primary {
+  background: linear-gradient(130deg,var(--rose2) 0%,var(--violet) 60%,var(--gold) 100%);
+  color:#fff; padding:14px 40px; border-radius:100px;
+  font-size:12px; font-weight:500; letter-spacing:0.14em; text-decoration:none; text-transform:uppercase;
+  transition:transform .25s, box-shadow .25s;
+  box-shadow:0 4px 24px rgba(255,60,172,0.35);
+  border: 2px solid #ffffff;
+  display:inline-block;
+}
+.btn-primary:hover { transform:translateY(-3px); box-shadow:0 10px 36px rgba(255,60,172,0.55); }
+.btn-ghost {
+  border:1.5px solid rgba(237,228,208,0.3); color:var(--text);
+  padding:14px 40px; border-radius:100px;
+  font-size:12px; font-weight:500; letter-spacing:0.14em; text-decoration:none; text-transform:uppercase;
+  transition:border-color .25s, color .25s, transform .25s;
+  display:inline-block;
+}
+.btn-ghost:hover { border-color:var(--rose); color:var(--rose); transform:translateY(-3px); }
+
+/* MARQUEE */
+.marquee-section {
+  padding:clamp(2rem,4vw,3rem) 0 0;
+  overflow:hidden;
+  position:relative;
+}
+.marquee-section::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--border),transparent);
+}
+.marquee-row { display:flex; gap:1rem; margin-bottom:1rem; white-space:nowrap; }
+.marquee-item {
+  display:inline-flex; align-items:center; gap:.6rem;
+  font-size:clamp(1rem,2vw,1.3rem); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--muted); flex-shrink:0; padding:0 .5rem;
+}
+.marquee-item .dot { color:var(--rose); font-size:.5rem; }
+.marquee-row:nth-child(1) { animation:marqueeLeft 30s linear infinite; }
+.marquee-row:nth-child(2) { animation:marqueeRight 25s linear infinite; }
+@keyframes marqueeLeft { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes marqueeRight { from{transform:translateX(-50%)} to{transform:translateX(0)} }
+
+/* FLAME DIVIDER */
+.flame-divider {
+  text-align:center; padding:3rem 0; font-size:2.5rem;
+  animation:flamePulse 3s ease-in-out infinite;
+}
+@keyframes flamePulse { 0%,100%{filter:drop-shadow(0 0 6px rgba(232,116,138,.5))} 50%{filter:drop-shadow(0 0 18px rgba(255,196,74,.9))} }
+
+/* ABOUT / EMOTION */
+.about-section-wrap {
+  background: #d4042b;
+  position: relative;
+  overflow: hidden;
+}
+.about-section-wrap::before {
+  content:''; position:absolute;
+  top:-100px; right:-100px;
+  width:500px; height:500px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+.about-section-wrap::after {
+  content:''; position:absolute;
+  bottom:-80px; left:-80px;
+  width:400px; height:400px;
+  background: radial-gradient(circle, rgba(0,0,0,0.15) 0%, transparent 70%);
+  pointer-events:none;
+}
+.about-section {
+  padding:clamp(3rem,6vw,6rem) clamp(1rem,5vw,5rem);
+  max-width:1300px; margin:0 auto;
+  display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center;
+  position: relative; z-index:1;
+}
+.about-label {
+  font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:rgba(255,255,255,0.7); font-weight:600; margin-bottom:1rem;
+}
+.about-h2 {
+  font-size:clamp(2.4rem,6vw,5rem);
+  font-weight:900; text-transform:uppercase; line-height:.95; letter-spacing:-.02em;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  background: none;
+  margin-bottom:1.8rem;
+}
+.about-h2 em {
+  background:linear-gradient(135deg, #FFE066 0%, #FFC94A 100%) !important;
+  -webkit-background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+  background-clip:text !important;
+  font-style:italic;
+}
+.about-body { font-size:clamp(.85rem,1.6vw,1rem); color:rgba(255,255,255,0.82); line-height:2; font-weight:300; margin-bottom:2.5rem; }
+.about-stats { display:flex; gap:2.5rem; flex-wrap:wrap; }
+.stat { display:flex; flex-direction:column; }
+.stat-num {
+  font-size:clamp(2rem,5vw,3.5rem); font-weight:900; line-height:1;
+  color:#FFE066;
+  background: none;
+  -webkit-text-fill-color: #FFE066;
+}
+.stat-label { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,0.65); margin-top:.2rem; }
+
+.about-cards { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.about-card {
+  background:rgba(0,0,0,0.28);
+  border:1px solid rgba(255,255,255,0.35);
+  border-radius:20px;
+  padding:1.8rem 1.5rem;
+  transition:transform .3s, border-color .3s, background .3s;
+  position:relative; overflow:hidden;
+  backdrop-filter: blur(4px);
+}
+.about-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,transparent,rgba(255,220,80,0.8),transparent);
+  opacity:0; transition:opacity .3s;
+}
+.about-card:hover { transform:translateY(-4px); border-color:rgba(255,255,255,0.45); background:rgba(0,0,0,0.28); }
+.about-card:hover::before { opacity:1; }
+.about-card:nth-child(3) { grid-column:span 2; }
+.card-icon { font-size:1.8rem; margin-bottom:.8rem; }
+.card-h3 { font-size:1.1rem; font-weight:700; color:#ffffff; margin-bottom:.4rem; }
+.card-p { font-size:.8rem; color:rgba(255,255,255,0.72); line-height:1.7; font-weight:300; }
+
+/* PRODUCTS */
+.products-section {
+  padding:clamp(4rem,8vw,7rem) clamp(1rem,4vw,3rem);
+  background:rgba(255,255,255,0.015);
+  position: relative;
+  overflow: hidden;
+}
+.products-deco-cursor {
+  position: absolute;
+  top: 60px;
+  right: clamp(20px, 6vw, 80px);
+  width: clamp(80px, 10vw, 140px);
+  pointer-events: none;
+  z-index: 0;
+  animation: decoFloat2 7s ease-in-out infinite;
+  filter: drop-shadow(0 8px 24px rgba(232,116,138,0.25));
+}
+.section-header { text-align:center; margin-bottom:clamp(2.5rem,5vw,4rem); }
+.section-tag { font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:var(--rose); font-weight:500; margin-bottom:.8rem; }
+.section-h2 {
+  font-size:clamp(2.2rem,7vw,5.5rem); font-weight:900; text-transform:uppercase; line-height:.95; letter-spacing:-.02em;
+  background:linear-gradient(180deg,#C8A882 0%,#F0E8D8 50%,#E8B4BC 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.section-sub { font-size:clamp(.8rem,1.5vw,.95rem); color:var(--muted); max-width:500px; margin:.8rem auto 0; line-height:1.8; font-weight:300; }
+.divider { width:40px; height:2px; background:linear-gradient(90deg,var(--rose),var(--gold2)); margin:1rem auto; border-radius:2px; }
+
+.filter-row { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:2.5rem; }
+.filter-btn {
+  padding:7px 18px; border:1px solid rgba(237,228,208,.18); border-radius:100px;
+  background:transparent; cursor:pointer; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); font-family:'Kanit',sans-serif; font-weight:500;
+  transition:all .2s;
+}
+.filter-btn.active, .filter-btn:hover {
+  background:linear-gradient(130deg,var(--rose2),var(--violet));
+  border-color:transparent; color:#fff;
+  box-shadow:0 4px 16px rgba(255,60,172,.3);
+}
+
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1.2rem; max-width:1300px; margin:0 auto; }
+.product-card {
+  background:rgba(255,255,255,0.035);
+  border:1px solid rgba(237,228,208,.1);
+  border-radius:20px; overflow:hidden;
+  transition:transform .3s, box-shadow .3s, border-color .3s;
+}
+.product-card:hover { transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(232,116,138,.3); border-color:rgba(232,116,138,.3); }
+.product-img {
+  height:160px; display:flex; align-items:center; justify-content:center;
+  font-size:3.5rem; position:relative;
+  border-bottom:1px solid rgba(237,228,208,.07);
+}
+.product-badge {
+  position:absolute; top:10px; right:10px;
+  font-size:8.5px; padding:4px 10px; border-radius:100px;
+  letter-spacing:.1em; text-transform:uppercase; font-weight:700;
+}
+.badge-new { background:linear-gradient(130deg,var(--rose2),var(--violet)); color:#fff; }
+.badge-pop { background:linear-gradient(130deg,var(--gold),var(--rose)); color:#0c0c0c; }
+.product-info { padding:1.2rem 1.4rem 1.5rem; }
+.product-cat { font-size:8.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--rose); font-weight:700; margin-bottom:.3rem; }
+.product-name { font-size:1.05rem; font-weight:700; color:var(--cream); margin-bottom:.35rem; }
+.product-desc { font-size:11.5px; color:var(--muted); line-height:1.65; font-weight:300; margin-bottom:.9rem; }
+.product-footer { display:flex; align-items:center; justify-content:space-between; }
+.product-price { font-size:.9rem; color:rgba(212,168,83,.7); font-style:italic; }
+.btn-order {
+  font-size:9.5px; padding:7px 14px;
+  background:transparent; border:1px solid rgba(232,116,138,.5);
+  color:var(--rose); border-radius:100px; cursor:pointer;
+  letter-spacing:.08em; text-transform:uppercase; font-family:'Kanit',sans-serif; font-weight:500;
+  transition:all .2s; text-decoration:none;
+}
+.btn-order:hover { background:var(--rose); border-color:var(--rose); color:#0c0c0c; }
+
+/* SERVICES */
+.services-section {
+  background: #F2DCC8;
+  border-radius: 40px 40px 0 0;
+  padding: clamp(4rem,8vw,7rem) clamp(1.5rem,5vw,5rem);
+  position: relative;
+  z-index: 2;
+}
+.services-section .section-tag { color: #a0522d; }
+.services-section .section-h2 {
+  color: #2C1A0E;
+  background: none;
+  -webkit-text-fill-color: #2C1A0E;
+}
+.services-section .section-sub { color: #6B4226; }
+.services-section .divider {
+  background: linear-gradient(90deg, transparent, #C1692A, transparent);
+}
+.services-carousel-wrap {
+  position: relative;
+  margin-top: 3rem;
+  overflow: hidden;
+}
+.services-carousel-wrap::before,
+.services-carousel-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+.services-carousel-wrap::before {
+  left: 0;
+  background: linear-gradient(90deg, #F2DCC8, transparent);
+}
+.services-carousel-wrap::after {
+  right: 0;
+  background: linear-gradient(90deg, transparent, #F2DCC8);
+}
+.services-list {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: servicesTicker 18s linear infinite;
+}
+.services-list:hover { animation-play-state: paused; }
+@keyframes servicesTicker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.service-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2.2rem 2rem;
+  border-radius: 24px;
+  background: #FDF6EE;
+  border: 1.5px solid rgba(193,105,42,0.2);
+  transition: transform .3s, box-shadow .3s, border-color .3s;
+  cursor: default;
+  width: 300px;
+  flex-shrink: 0;
+}
+.service-item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(193,105,42,0.18);
+  border-color: rgba(193,105,42,0.45);
+}
+.service-num {
+  font-size: clamp(2rem,5vw,3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #C1692A 0%, #E8A050 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.service-content { padding-top: 0; }
+.service-icon-small { 
+  font-size: 1.8rem; 
+  margin-bottom: .6rem; 
+}
+.service-icon-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 1rem auto;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 4px 16px rgba(193,105,42,0.2));
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), filter .3s;
+}
+.service-item:hover .service-icon-img {
+  transform: scale(1.10) rotate(-3deg);
+  filter: drop-shadow(0 8px 24px rgba(193,105,42,0.38));
+}
+.service-name {
+  font-size: clamp(1rem,2vw,1.25rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #2C1A0E;
+  margin-bottom: .5rem;
+  letter-spacing: .04em;
+  -webkit-text-fill-color: #2C1A0E;
+}
+.service-desc {
+  font-size: clamp(.8rem,1.4vw,.9rem);
+  color: #6B4226;
+  line-height: 1.8;
+  font-weight: 400;
+}
+.service-items {
+  list-style: none;
+  margin-top: .8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .8rem;
+}
+.service-items li {
+  font-size: 10.5px;
+  color: #5A3820;
+  padding-left: 14px;
+  position: relative;
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+.service-items li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  font-size: 5px;
+  top: 5px;
+  color: #C1692A;
+}
+
+/* REVIEWS — carrusel infinito */
+.reviews-section {
+  padding: clamp(4rem,8vw,7rem) 0;
+  background: #0C0C0C;
+  overflow: hidden;
+}
+.reviews-section .section-header {
+  padding: 0 clamp(1.5rem,5vw,5rem);
+}
+.reviews-carousel-wrap {
+  position: relative;
+  margin-top: 3rem;
+  overflow: hidden;
+}
+/* fade edges */
+.reviews-carousel-wrap::before,
+.reviews-carousel-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+.reviews-carousel-wrap::before {
+  left: 0;
+  background: linear-gradient(90deg, #0C0C0C, transparent);
+}
+.reviews-carousel-wrap::after {
+  right: 0;
+  background: linear-gradient(90deg, transparent, #0C0C0C);
+}
+.reviews-track {
+  display: flex;
+  gap: 1.4rem;
+  width: max-content;
+  will-change: transform;
+}
+.reviews-track:hover { animation-play-state: paused; }
+.review-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(237,228,208,0.12);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 320px;
+  flex-shrink: 0;
+  transition: transform .3s, border-color .3s, background .3s;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+.review-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--rose), var(--gold2));
+  opacity: 0;
+  transition: opacity .3s;
+}
+.review-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(232,116,138,0.35);
+}
+.review-card:hover::after { opacity: 1; }
+.stars { color: var(--gold2); font-size: 13px; letter-spacing: 3px; margin-bottom: 1rem; }
+.review-text {
+  font-size: .92rem;
+  font-style: italic;
+  color: rgba(237,228,208,0.90);
+  line-height: 1.85;
+  margin-bottom: 1.4rem;
+  font-weight: 300;
+}
+.reviewer { display: flex; align-items: center; gap: .8rem; }
+.reviewer-dot {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose2), var(--violet));
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(255,60,172,0.3);
+}
+.reviewer-info h5 { font-size: 13px; color: #fff; font-weight: 700; }
+.reviewer-info p  { font-size: 10.5px; color: rgba(237,228,208,0.55); margin-top: 2px; }
+
+/* CONTACT */
+.contact-section {
+  padding: 0;
+  background: #FDF6EE;
+  position: relative;
+  overflow: visible;
+}
+/* Separador SVG cera derretida superior */
+.contact-wax-top {
+  display: block;
+  width: 100%;
+  margin-bottom: -2px;
+  line-height: 0;
+}
+.contact-wax-bottom {
+  display: block;
+  width: 100%;
+  margin-top: -2px;
+  line-height: 0;
+}
+.contact-inner-wrap {
+  padding: clamp(2rem,5vw,5rem) clamp(1rem,4vw,3rem);
+  position: relative;
+  z-index: 1;
+}
+/* Gotas decorativas */
+.wax-img {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+.wax-img-left {
+  bottom: 50px;
+  left: -10px;
+  width: clamp(130px, 15vw, 210px);
+  transform: scaleX(-1);
+}
+.wax-img-right {
+  bottom: 50px;
+  right: -10px;
+  width: clamp(130px, 15vw, 210px);
+}
+
+.contact-inner { display:grid; grid-template-columns:1fr 1fr; gap:5rem; max-width:1100px; margin:0 auto; align-items:center; position:relative; z-index:1; }
+.contact-h2 {
+  font-size:clamp(2rem,5vw,4rem); font-weight:900; text-transform:uppercase; line-height:.95;
+  color: #2C1A0E;
+  -webkit-text-fill-color: #2C1A0E;
+  background: none;
+  margin-bottom:1.8rem;
+}
+.contact-h2 em {
+  background: linear-gradient(135deg, #C1692A, #E8A050) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  font-style: italic;
+}
+.loc-list { display:flex; flex-direction:column; gap:1.4rem; margin-bottom:2.5rem; }
+.loc-item { display:flex; gap:1rem; align-items:flex-start; }
+.loc-icon {
+  width:40px; height:40px; border-radius:12px;
+  background:rgba(193,105,42,0.12); border:1px solid rgba(193,105,42,0.3);
+  display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;
+}
+.loc-info h4 { font-size:10px; font-weight:700; color:#C1692A; letter-spacing:.1em; text-transform:uppercase; margin-bottom:3px; }
+.loc-info p, .loc-info a { font-size:13px; color:#6B4226; font-weight:400; line-height:1.6; text-decoration:none; }
+.loc-info a:hover { color:#C1692A; }
+.contact-visual {
+  background: #FFF8F0;
+  border: 2px solid rgba(193,105,42,0.25);
+  border-radius: 30px 30px 60px 30px / 30px 30px 30px 60px;
+  min-height:320px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1.2rem; padding:3rem;
+  text-align:center; position:relative; overflow:hidden;
+  box-shadow: 8px 12px 40px rgba(193,105,42,0.12), inset 0 0 40px rgba(255,220,180,0.2);
+}
+.contact-visual::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 80% 60% at 50% 20%, rgba(255,200,140,0.25) 0%, transparent 70%);
+  pointer-events:none;
+}
+/* Gotas dentro de la tarjeta */
+.contact-visual::after {
+  content:'';
+  position:absolute;
+  top:-20px; right:20px;
+  width:40px; height:60px;
+  background: rgba(232,196,160,0.4);
+  border-radius: 50% 50% 60% 40% / 60% 60% 40% 40%;
+  transform: rotate(10deg);
+}
+.contact-flame { font-size:4rem; animation:flamePulse 3s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(255,160,80,0.5)); }
+.contact-visual p { font-size:1.2rem; font-style:italic; color:#4A2C0E; font-weight:300; }
+.contact-visual small { font-size:11px; color:#A07850; letter-spacing:.1em; }
+.btn-map {
+  background:rgba(193,105,42,0.1); color:#C1692A;
+  padding:10px 24px; border-radius:100px; border:1px solid rgba(193,105,42,0.35);
+  font-size:10px; font-weight:700; letter-spacing:.1em; text-decoration:none; text-transform:uppercase;
+  transition:background .2s, color .2s;
+}
+.btn-map:hover { background:#C1692A; color:#FDF6EE; }
+
+/* CTA BAND */
+.cta-band {
+  padding:clamp(4rem,8vw,6rem) clamp(1rem,4vw,3rem);
+  text-align:center;
+  position:relative; overflow:hidden;
+}
+.cta-deco {
+  position:absolute;
+  pointer-events:none;
+  z-index:0;
+}
+.cta-deco img { width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 32px rgba(232,116,138,0.3)); }
+.cta-deco-tl {
+  top:-20px; left:-30px;
+  width:clamp(120px,14vw,200px);
+  animation: decoFloat1 7s ease-in-out infinite;
+}
+.cta-deco-tr {
+  top:-10px; right:-20px;
+  width:clamp(110px,12vw,180px);
+  animation: decoFloat2 8s ease-in-out infinite;
+}
+.cta-deco-bl {
+  bottom:-30px; left:5%;
+  width:clamp(90px,10vw,150px);
+  animation: decoFloat2 9s ease-in-out infinite;
+}
+.cta-deco-br {
+  bottom:-20px; right:4%;
+  width:clamp(100px,11vw,160px);
+  animation: decoFloat1 6s ease-in-out infinite;
+}
+@keyframes decoFloat1 {
+  0%,100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-18px) rotate(4deg); }
+}
+@keyframes decoFloat2 {
+  0%,100% { transform: translateY(0) rotate(5deg); }
+  50%      { transform: translateY(-14px) rotate(-5deg); }
+}
+.cta-band::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,60,172,.08) 0%,rgba(123,47,190,.08) 50%,rgba(212,168,83,.06) 100%);
+}
+.cta-band-inner { position:relative; z-index:1; }
+.cta-h2 {
+  font-size:clamp(2rem,7vw,6rem); font-weight:900; text-transform:uppercase; line-height:.95;
+  background:linear-gradient(135deg,var(--rose) 0%,var(--gold2) 50%,var(--violet2) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:1.5rem;
+}
+.cta-band p { font-size:clamp(.8rem,1.8vw,1rem); color:var(--muted); max-width:500px; margin:0 auto 2.5rem; line-height:1.8; font-weight:300; }
+
+/* WELCOME MODAL */
+.welcome-modal {
+  position: fixed; inset: 0;
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity .4s, visibility .4s;
+}
+.welcome-modal.visible { opacity: 1; visibility: visible; }
+.welcome-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(6px);
+}
+.welcome-box {
+  position: relative; z-index: 1;
+  background: #0C0C0C;
+  border: 1px solid rgba(232,116,138,0.35);
+  border-radius: 28px;
+  padding: clamp(2rem,5vw,3.5rem) clamp(1.5rem,4vw,3rem);
+  max-width: 480px; width: 90%;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(232,116,138,0.1);
+  animation: modalPop .5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes modalPop {
+  from { transform: scale(0.85) translateY(20px); opacity:0; }
+  to   { transform: scale(1) translateY(0); opacity:1; }
+}
+.welcome-close {
+  position: absolute; top: 1rem; right: 1.2rem;
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  font-size: 1.1rem; cursor: pointer; transition: color .2s;
+}
+.welcome-close:hover { color: var(--rose); }
+.welcome-flame { font-size: 2.8rem; margin-bottom: .8rem; animation: flamePulse 3s ease-in-out infinite; }
+.welcome-tag { font-size: 10px; letter-spacing: .28em; text-transform: uppercase; color: var(--rose); margin-bottom: .8rem; font-weight: 500; }
+.welcome-title {
+  font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 900; text-transform: uppercase;
+  color: #fff; line-height: 1; margin-bottom: 1.2rem;
+}
+.welcome-title em {
+  background: linear-gradient(135deg, var(--rose), var(--gold2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-style: italic;
+}
+.welcome-body { font-size: .9rem; color: rgba(237,228,208,0.72); line-height: 1.8; margin-bottom: 2rem; font-weight: 300; }
+.welcome-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.welcome-btn-primary {
+  background: linear-gradient(130deg, var(--rose2), var(--violet));
+  color: #fff; padding: 12px 28px; border-radius: 100px; border: 2px solid #fff;
+  font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  text-decoration: none; transition: transform .2s, box-shadow .2s;
+}
+.welcome-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,116,138,0.4); }
+.welcome-btn-secondary {
+  background: transparent; color: rgba(237,228,208,0.8);
+  padding: 12px 28px; border-radius: 100px; border: 1px solid rgba(237,228,208,0.25);
+  font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+  text-decoration: none; transition: border-color .2s, color .2s;
+}
+.welcome-btn-secondary:hover { border-color: var(--rose); color: var(--rose); }
+
+/* FOOTER */
+footer {
+  background: #ffffff;
+  border-top:1px solid rgba(0,0,0,.08);
+  padding:clamp(2.5rem,5vw,4rem) clamp(1rem,4vw,3rem) 2rem;
+  text-align:center;
+}
+.footer-logo { margin-bottom:1rem; }
+.footer-logo img { height:120px; opacity:1; object-fit:contain; }
+.footer-tagline { font-size:.9rem; font-style:italic; color:var(--rose); margin-bottom:2rem; font-weight:400; }
+.footer-links { display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:2rem; }
+.footer-links a { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(0,0,0,.75); text-decoration:none; transition:color .2s; font-weight:600; }
+.footer-links a:hover { color:var(--rose); }
+.footer-bottom { border-top:1px solid rgba(0,0,0,.1); padding-top:1.5rem; font-size:10px; color:rgba(0,0,0,.6); }
+
+/* WHATSAPP FLOAT */
+.wa-float {
+  position:fixed; bottom:2rem; right:2rem; z-index:600;
+  width:56px; height:56px; border-radius:50%;
+  background:linear-gradient(135deg,#25D366,#128C7E);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,.4);
+  text-decoration:none; transition:transform .25s;
+  animation:waPulse 2.5s infinite;
+}
+.wa-float:hover { transform:scale(1.1); }
+.wa-float svg { width:26px; height:26px; fill:#fff; }
+@keyframes waPulse { 0%,100%{box-shadow:0 4px 20px rgba(37,211,102,.4)} 50%{box-shadow:0 4px 32px rgba(37,211,102,.7)} }
+
+/* REVEAL ANIMATIONS */
+.reveal { opacity:0; transform:translateY(28px); transition:opacity .75s ease, transform .75s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+.reveal-left { opacity:0; transform:translateX(-40px); transition:opacity .75s ease, transform .75s ease; }
+.reveal-left.visible { opacity:1; transform:translateX(0); }
+.reveal-right { opacity:0; transform:translateX(40px); transition:opacity .75s ease, transform .75s ease; }
+.reveal-right.visible { opacity:1; transform:translateX(0); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes scrollPulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+/* Mobile menu */
+.mobile-menu {
+  display:none; position:fixed; inset:0; z-index:499;
+  background:rgba(12,12,12,0.98); flex-direction:column; align-items:center; justify-content:center; gap:2.5rem;
+}
+.mobile-menu.open { display:flex; }
+.mobile-menu a { color:var(--text); font-size:1.5rem; font-weight:700; text-decoration:none; text-transform:uppercase; letter-spacing:0.1em; }
+
+/* Mobile hamburger in hero topbar */
+.hero-hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; z-index:20; }
+.hero-hamburger span { width:22px; height:1.5px; background:var(--text); display:block; }
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  .about-section { grid-template-columns:1fr; gap:3rem; }
+  .contact-inner { grid-template-columns:1fr; gap:2.5rem; }
+}
+@media(max-width:768px) {
+  .hero-nav-link { display:none; }
+  .hero-hamburger { display:flex; }
+  .hero-topbar { justify-content:flex-end; }
+  .about-cards { grid-template-columns:1fr; }
+  .about-card:nth-child(3) { grid-column:span 1; }
+  .candle-art { font-size: clamp(80px,24vw,140px); }
+
+  /* Hero móvil */
+  .hero {
+    height: 100svh;
+    min-height: 620px;
+  }
+  .hero-heading-wrap {
+    top: clamp(70px, 14vw, 110px);
+    text-align: center;
+  }
+  .hero-h1 {
+    font-size: clamp(13vw, 16vw, 19vw);
+    white-space: normal;
+    line-height: .9;
+    text-align: center;
+  }
+  .hero-figure {
+    width: clamp(200px, 60vw, 320px);
+    bottom: 110px;
+  }
+  .hero-bottom {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+    bottom: clamp(1.2rem, 4vw, 2rem);
+    padding: 0 1.5rem;
+  }
+  .hero-bottom-text {
+    max-width: 100%;
+    font-size: clamp(.65rem, 2.5vw, .8rem);
+    letter-spacing: .1em;
+  }
+  .hero-cta-btn {
+    font-size: .7rem;
+    padding: 12px 28px;
+  }
+}
+@media(max-width:480px) {
+  .products-grid { grid-template-columns:1fr 1fr; }
+  .product-img { height:120px; font-size:2.8rem; }
+  .hero-h1 { font-size: 15vw; }
+  .hero-figure { width: clamp(160px, 55vw, 260px); bottom: 120px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Sticky nav (appears after scrolling past hero) -->
+<nav class="sticky-nav" id="stickyNav">
+  <a href="#productos">Productos</a>
+  <a href="#servicios">Servicios</a>
+  <a href="#resenas">Reseñas</a>
+  <a href="#contacto">Contacto</a>
+  <a href="https://wa.me/573168275865" target="_blank" style="color:var(--rose);">Pedir Ahora</a>
+</nav>
+
+<!-- Mobile menu (triggered from hero topbar on small screens) -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#productos" onclick="toggleMenu()">Productos</a>
+  <a href="#servicios" onclick="toggleMenu()">Servicios</a>
+  <a href="#resenas" onclick="toggleMenu()">Reseñas</a>
+  <a href="#contacto" onclick="toggleMenu()">Contacto</a>
+  <a href="https://wa.me/573168275865" target="_blank" style="color:#25D366;">💬 WhatsApp</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+
+  <!-- ① BLOB corners — solid SVG organic shapes, z=3 -->
+  <div class="blob blob-tl">
+    <svg viewBox="0 0 500 420" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="btl" cx="38%" cy="36%" r="62%">
+          <stop offset="0%"  stop-color="#1C1208" stop-opacity="1"/>
+          <stop offset="42%" stop-color="#140E06" stop-opacity="0.97"/>
+          <stop offset="72%" stop-color="#0E0A04" stop-opacity="0.82"/>
+          <stop offset="100%" stop-color="#0C0C0C" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="sf1"><feGaussianBlur stdDeviation="14"/></filter>
+      </defs>
+      <path d="M0,0 C60,0 200,-10 310,60 C400,120 480,200 500,300 C510,360 460,420 380,420 C260,420 100,380 20,300 C-40,240 -20,100 0,0Z"
+            fill="url(#btl)" filter="url(#sf1)"/>
+    </svg>
+  </div>
+
+  <div class="blob blob-tr">
+    <svg viewBox="0 0 480 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="btr" cx="65%" cy="34%" r="60%">
+          <stop offset="0%"  stop-color="#1A1008" stop-opacity="1"/>
+          <stop offset="40%" stop-color="#130C05" stop-opacity="0.96"/>
+          <stop offset="70%" stop-color="#0D0902" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#0C0C0C" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="sf2"><feGaussianBlur stdDeviation="13"/></filter>
+      </defs>
+      <path d="M480,0 C420,0 290,-8 180,55 C90,110 10,195 0,290 C-10,355 40,400 120,400 C240,400 400,365 465,285 C520,220 510,90 480,0Z"
+            fill="url(#btr)" filter="url(#sf2)"/>
+    </svg>
+  </div>
+
+  <div class="blob blob-bl">
+    <svg viewBox="0 0 440 380" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="bbl" cx="30%" cy="68%" r="58%">
+          <stop offset="0%"  stop-color="#1A1008" stop-opacity="1"/>
+          <stop offset="45%" stop-color="#110C05" stop-opacity="0.94"/>
+          <stop offset="72%" stop-color="#0D0902" stop-opacity="0.75"/>
+          <stop offset="100%" stop-color="#0C0C0C" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="sf3"><feGaussianBlur stdDeviation="12"/></filter>
+      </defs>
+      <path d="M0,380 C50,380 180,395 290,330 C375,278 440,200 440,110 C440,50 395,0 320,0 C210,0 60,40 10,130 C-30,200 -20,310 0,380Z"
+            fill="url(#bbl)" filter="url(#sf3)"/>
+    </svg>
+  </div>
+
+  <div class="blob blob-br">
+    <svg viewBox="0 0 460 390" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="bbr" cx="68%" cy="70%" r="60%">
+          <stop offset="0%"  stop-color="#1C1208" stop-opacity="1"/>
+          <stop offset="42%" stop-color="#130E05" stop-opacity="0.95"/>
+          <stop offset="70%" stop-color="#0E0A03" stop-opacity="0.78"/>
+          <stop offset="100%" stop-color="#0C0C0C" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="sf4"><feGaussianBlur stdDeviation="13"/></filter>
+      </defs>
+      <path d="M460,390 C410,390 280,405 170,342 C80,290 0,210 0,120 C0,55 48,0 130,0 C248,0 400,42 448,132 C490,210 480,320 460,390Z"
+            fill="url(#bbr)" filter="url(#sf4)"/>
+    </svg>
+  </div>
+
+  <!-- ② Warm amber glow center -->
+  <div class="hero-glow"></div>
+
+  <!-- ③ Floating sparks -->
+  <div class="hero-sparks" id="sparks"></div>
+
+  <!-- ④ TOPBAR — z=20 -->
+  <div class="hero-topbar">
+    <a href="#productos" class="hero-nav-link">Productos</a>
+    <a href="#servicios" class="hero-nav-link">Servicios</a>
+    <a href="#resenas" class="hero-nav-link">Reseñas</a>
+    <a href="#contacto" class="hero-nav-link">Contacto</a>
+    <div class="hero-hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- ⑤ MASSIVE TITLE — z=6, bleeds both sides, BEHIND candle -->
+  <div class="hero-heading-wrap">
+    <h1 class="hero-h1">Luz de <span class="word-milagros">Milagros</span></h1>
+  </div>
+
+  <!-- ⑥ IMAGEN 3D CENTRAL — z=10, delante del título -->
+  <div class="hero-figure">
+    <img src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/e53a2fe9-310d-4ba7-9bf7-5d5f2aca9bdb.png" alt="Vela 3D Luz de Milagros" class="hero-figure-img">
+  </div>
+
+
+
+  <!-- ⑦ BOTTOM BAR -->
+  <div class="hero-bottom">
+    <p class="hero-bottom-text">Velas artesanales hechas<br>con amor · El Cerrito,<br>Valle del Cauca, Colombia</p>
+    <a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20hacer%20un%20pedido%20🕯️" target="_blank" class="hero-cta-btn">Hacer un Pedido</a>
+  </div>
+
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-row">
+    <div class="marquee-item">Velas Artesanales <span class="dot">●</span></div>
+    <div class="marquee-item">Baby Shower <span class="dot">●</span></div>
+    <div class="marquee-item">Regalos Únicos <span class="dot">●</span></div>
+    <div class="marquee-item">Quinceañeras <span class="dot">●</span></div>
+    <div class="marquee-item">Velas Personalizadas <span class="dot">●</span></div>
+    <div class="marquee-item">El Cerrito Valle <span class="dot">●</span></div>
+    <div class="marquee-item">Aromas Exclusivos <span class="dot">●</span></div>
+    <div class="marquee-item">Cajas Sorpresa <span class="dot">●</span></div>
+    <!-- duplicate for seamless -->
+    <div class="marquee-item">Velas Artesanales <span class="dot">●</span></div>
+    <div class="marquee-item">Baby Shower <span class="dot">●</span></div>
+    <div class="marquee-item">Regalos Únicos <span class="dot">●</span></div>
+    <div class="marquee-item">Quinceañeras <span class="dot">●</span></div>
+    <div class="marquee-item">Velas Personalizadas <span class="dot">●</span></div>
+    <div class="marquee-item">El Cerrito Valle <span class="dot">●</span></div>
+    <div class="marquee-item">Aromas Exclusivos <span class="dot">●</span></div>
+    <div class="marquee-item">Cajas Sorpresa <span class="dot">●</span></div>
+  </div>
+  <div class="marquee-row">
+    <div class="marquee-item">🕯️ Hecho a Mano <span class="dot">●</span></div>
+    <div class="marquee-item">Lavanda · Vainilla · Canela <span class="dot">●</span></div>
+    <div class="marquee-item">Bodas & Eventos <span class="dot">●</span></div>
+    <div class="marquee-item">🌸 100% Artesanal <span class="dot">●</span></div>
+    <div class="marquee-item">Detalles con Amor <span class="dot">●</span></div>
+    <div class="marquee-item">Pedidos a Domicilio <span class="dot">●</span></div>
+    <div class="marquee-item">🕯️ Hecho a Mano <span class="dot">●</span></div>
+    <div class="marquee-item">Lavanda · Vainilla · Canela <span class="dot">●</span></div>
+    <div class="marquee-item">Bodas & Eventos <span class="dot">●</span></div>
+    <div class="marquee-item">🌸 100% Artesanal <span class="dot">●</span></div>
+    <div class="marquee-item">Detalles con Amor <span class="dot">●</span></div>
+    <div class="marquee-item">Pedidos a Domicilio <span class="dot">●</span></div>
+  </div>
+</div>
+
+
+<!-- ABOUT -->
+<section class="about-section-wrap">
+  <div class="about-section">
+    <div class="reveal-left">
+      <p class="about-label">Lo que realmente regalas</p>
+      <h2 class="about-h2">No vendes<br>una vela,<br>vendes el<br><em>instante</em></h2>
+      <p class="about-body">Una vela no solo ilumina un cuarto. Revive una conversación, marca el inicio de algo nuevo, dice "te quiero" sin palabras. En Luz de Milagros hacemos eso posible, uno a uno. Somos una emprendedora del Valle del Cauca que convirtió el amor por lo artesanal en una forma de conectar personas con los momentos que más importan.</p>
+      <div class="about-stats">
+        <div class="stat"><span class="stat-num">+5</span><span class="stat-label">Años de experiencia</span></div>
+        <div class="stat"><span class="stat-num">+500</span><span class="stat-label">Pedidos entregados</span></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Artesanal</span></div>
+      </div>
+    </div>
+    <div class="about-cards reveal-right">
+      <div class="about-card">
+        <div class="card-icon">🥰</div>
+        <h3 class="card-h3">El amor que se ve</h3>
+        <p class="card-p">Cuando alguien recibe una vela personalizada, siente que pensaron en él. Eso no tiene precio.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">🌸</div>
+        <h3 class="card-h3">Momentos únicos</h3>
+        <p class="card-p">Baby shower, quinceañera, cumpleaños, grado. Los momentos importantes merecen detalles especiales.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">✨</div>
+        <h3 class="card-h3">Aromas que enamoran</h3>
+        <p class="card-p">Vainilla, lavanda, canela, coco... cada fragancia enciende algo especial en el alma.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products-section" id="productos">
+  <img class="products-deco-cursor" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/Group_134-1.2e04f3ce.png" alt="">
+  <div class="section-header">
+    <p class="section-tag reveal">Para cada persona que amas</p>
+    <h2 class="section-h2 reveal">Una vela para cada<br><em style="background:linear-gradient(135deg,var(--rose),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic;">momento especial</em></h2>
+    <div class="divider reveal"></div>
+    <p class="section-sub reveal">Dinos quién lo va a recibir y nosotras lo hacemos especial. Aromas, diseños y presentaciones pensadas para que quien lo abra, lo recuerde siempre.</p>
+  </div>
+  <div class="filter-row" id="filterBtns">
+    <button class="filter-btn active" data-cat="all">Todos</button>
+    <button class="filter-btn" data-cat="aromatica">Aromáticas</button>
+    <button class="filter-btn" data-cat="personalizada">Personalizadas</button>
+    <button class="filter-btn" data-cat="recordatorio">Recordatorios</button>
+    <button class="filter-btn" data-cat="corporativo">Corporativas</button>
+    <button class="filter-btn" data-cat="regalo">Regalos</button>
+  </div>
+  <div class="products-grid" id="productsGrid">
+    <div class="product-card" data-cat="aromatica">
+      <div class="product-img" style="background:linear-gradient(135deg,#2a1a0a,#1a0e05);">🕯️<span class="product-badge badge-pop">Popular</span></div>
+      <div class="product-info"><p class="product-cat">Aromática</p><h3 class="product-name">Vela Vainilla Dorada</h3><p class="product-desc">Para los que llegan a casa y quieren que huela a abrazo. Cera de soya 100%, larga duración.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20me%20interesa%20la%20Vela%20Vainilla%20Dorada%20🕯️" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="personalizada">
+      <div class="product-img" style="background:linear-gradient(135deg,#1a1020,#0d0814);">💫<span class="product-badge badge-new">Nuevo</span></div>
+      <div class="product-info"><p class="product-cat">Personalizada</p><h3 class="product-name">Vela con Tu Nombre</h3><p class="product-desc">Porque ver tu nombre en una llama no tiene igual. Aroma a elección y diseño exclusivo para quien más quieres.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20una%20Vela%20con%20nombre%20🕯️" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="recordatorio">
+      <div class="product-img" style="background:linear-gradient(135deg,#2a0a14,#180810);">👶<span class="product-badge badge-pop">Popular</span></div>
+      <div class="product-info"><p class="product-cat">Recordatorio</p><h3 class="product-name">Baby Shower Niña</h3><p class="product-desc">El detalle que las invitadas se llevan a casa y no olvidan. Fragancia floral, presentación rosa, 100% personalizable.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20recordatorios%20Baby%20Shower%20Niña%20🌸" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="recordatorio">
+      <div class="product-img" style="background:linear-gradient(135deg,#0a1020,#060c18);">🍼</div>
+      <div class="product-info"><p class="product-cat">Recordatorio</p><h3 class="product-name">Baby Shower Niño</h3><p class="product-desc">Para celebrar la llegada del nuevo integrante con un detalle que cada invitado va a querer guardar.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20recordatorios%20Baby%20Shower%20Niño%20💙" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="aromatica">
+      <div class="product-img" style="background:linear-gradient(135deg,#150a20,#0d0614);">🌸</div>
+      <div class="product-info"><p class="product-cat">Aromática</p><h3 class="product-name">Lavanda Zen</h3><p class="product-desc">La vela para después de un día largo. Lavanda pura que calma, relaja y hace que el cuarto respire diferente.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20me%20interesa%20la%20Vela%20Lavanda%20Zen%20🌸" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="corporativo">
+      <div class="product-img" style="background:linear-gradient(135deg,#0a1418,#060c10);">🏢<span class="product-badge badge-new">Nuevo</span></div>
+      <div class="product-info"><p class="product-cat">Corporativa</p><h3 class="product-name">Vela Oficina Inspira</h3><p class="product-desc">Porque el escritorio también merece buena energía. Aroma cítrico y mensaje que arranca el día con fuerza.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20velas%20para%20oficina%20motivacionales%20🏢" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="recordatorio">
+      <div class="product-img" style="background:linear-gradient(135deg,#201408,#140e05);">🎂</div>
+      <div class="product-info"><p class="product-cat">Recordatorio</p><h3 class="product-name">Cumpleaños Mágico</h3><p class="product-desc">Con su nombre, su fecha y el aroma que más le gusta. El recordatorio que nadie va a botar.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20recordatorios%20de%20cumpleaños%20🎂" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="regalo">
+      <div class="product-img" style="background:linear-gradient(135deg,#0a1a0e,#06100a);">🎁<span class="product-badge badge-pop">Popular</span></div>
+      <div class="product-info"><p class="product-cat">Regalo</p><h3 class="product-name">Caja Sorpresa Deluxe</h3><p class="product-desc">Vela aromática + chocolate + tarjeta con tu mensaje. Para cuando las palabras solas no alcanzan.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20una%20Caja%20Sorpresa%20Deluxe%20🎁" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="aromatica">
+      <div class="product-img" style="background:linear-gradient(135deg,#1e1605,#120e03);">🥥</div>
+      <div class="product-info"><p class="product-cat">Aromática</p><h3 class="product-name">Coco Tropical</h3><p class="product-desc">Cierra los ojos, enciéndela y listo: playa, brisa y ese olor que te transporta lejos de todo.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20me%20interesa%20la%20Vela%20Coco%20Tropical%20🥥" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="personalizada">
+      <div class="product-img" style="background:linear-gradient(135deg,#200a10,#14060c);">💍</div>
+      <div class="product-info"><p class="product-cat">Personalizada</p><h3 class="product-name">Vela de Pareja</h3><p class="product-desc">Su nombre, tu nombre y la fecha que lo cambió todo. El regalo de amor que no se olvida ni se apaga.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20una%20Vela%20de%20Pareja%20💍" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="corporativo">
+      <div class="product-img" style="background:linear-gradient(135deg,#0c1a10,#080e0a);">🌿</div>
+      <div class="product-info"><p class="product-cat">Corporativa</p><h3 class="product-name">Set Empresarial Verde</h3><p class="product-desc">El detalle de fin de año que el equipo va a recordar. Velas naturales con presentación profesional y tu marca.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20me%20interesa%20el%20Set%20Empresarial%20🌿" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="recordatorio">
+      <div class="product-img" style="background:linear-gradient(135deg,#1a0a20,#100614);">👸</div>
+      <div class="product-info"><p class="product-cat">Recordatorio</p><h3 class="product-name">Quinceañera Soñada</h3><p class="product-desc">Para que cada invitada se lleve un pedacito de ese día tan especial. Fragancia de rosas, diseño elegante.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20recordatorios%20Quinceañera%20👸" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="regalo">
+      <div class="product-img" style="background:linear-gradient(135deg,#1a0e06,#100a04);">☕</div>
+      <div class="product-info"><p class="product-cat">Regalo</p><h3 class="product-name">Desayuno Sorpresa</h3><p class="product-desc">Vela aromática + desayuno a domicilio. Para ese "te quiero" que llevas días queriendo decir.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20pedir%20un%20Desayuno%20Sorpresa%20☕" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="regalo">
+      <div class="product-img" style="background:linear-gradient(135deg,#1a0a18,#100612);">🌺</div>
+      <div class="product-info"><p class="product-cat">Regalo</p><h3 class="product-name">Caja Día de la Madre</h3><p class="product-desc">Vela + flores secas + tarjeta con tu mensaje. Porque ella se merece más que flores solas.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20la%20Caja%20Día%20de%20la%20Madre%20🌺" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+    <div class="product-card" data-cat="regalo">
+      <div class="product-img" style="background:linear-gradient(135deg,#0a1a0c,#06100a);">🌹</div>
+      <div class="product-info"><p class="product-cat">Regalo</p><h3 class="product-name">Set San Valentín</h3><p class="product-desc">2 velas + pétalos de rosa + mensaje secreto escrito a mano. El regalo de amor que nunca defrauda.</p><div class="product-footer"><span class="product-price">Consultar precio</span><a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20el%20Set%20San%20Valentín%20🌹" target="_blank" class="btn-order">Pedir</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section" id="servicios">
+  <div class="section-header">
+    <p class="section-tag reveal">Más que velas</p>
+    <h2 class="section-h2 reveal">Servicios que hacen<br><em style="background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic;">memorables</em><br>tus momentos</h2>
+    <div class="divider reveal"></div>
+  </div>
+  <div class="services-carousel-wrap"><div class="services-list">
+
+    <div class="service-item">
+      <span class="service-num">01</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_49_53%20a.m..png" alt="Recordatorios para Eventos">
+      <div class="service-content">
+        <h3 class="service-name">Recordatorios para Eventos</h3>
+        <p class="service-desc">Diseñamos y elaboramos recordatorios personalizados para cualquier celebración. Cada uno, único.</p>
+        <ul class="service-items">
+          <li>Baby shower niña y niño</li>
+          <li>Quinceañeras y cumpleaños</li>
+          <li>Matrimonios y bautizos</li>
+          <li>Primeras comuniones</li>
+          <li>Eventos empresariales</li>
+        </ul>
+      </div>
+    </div>
+    <div class="service-item">
+      <span class="service-num">02</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_50_00%20a.m..png" alt="Ambientación para Oficinas">
+      <div class="service-content">
+        <h3 class="service-name">Ambientación para Oficinas</h3>
+        <p class="service-desc">Tu espacio de trabajo merece una buena energía. Velas con aromas y mensajes que inspiran cada día.</p>
+        <ul class="service-items">
+          <li>Mensajes motivacionales</li>
+          <li>Sets corporativos de regalo</li>
+          <li>Ambientación de recepciones</li>
+          <li>Detalles para clientes VIP</li>
+        </ul>
+      </div>
+    </div>
+    <div class="service-item">
+      <span class="service-num">03</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_53_28%20a.m..png" alt="Regalos y Detalles Personalizados">
+      <div class="service-content">
+        <h3 class="service-name">Regalos &amp; Detalles Personalizados</h3>
+        <p class="service-desc">Cajas regalo, desayunos sorpresa y kits especiales armados con amor para decir lo que sientes.</p>
+        <ul class="service-items">
+          <li>Cajas de regalo armadas</li>
+          <li>Desayunos sorpresa a domicilio</li>
+          <li>Kits spa y bienestar</li>
+          <li>Detalles para fechas especiales</li>
+        </ul>
+      </div>
+    </div>
+    <div class="service-item">
+      <span class="service-num">04</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_57_12%20a.m..png" alt="Bodas y Celebraciones Especiales">
+      <div class="service-content">
+        <h3 class="service-name">Bodas &amp; Celebraciones Especiales</h3>
+        <p class="service-desc">Creamos experiencias únicas para los días más importantes de tu vida, con velas y detalles artesanales a medida.</p>
+        <ul class="service-items">
+          <li>Decoración con velas para bodas</li>
+          <li>Centros de mesa artesanales</li>
+          <li>Recordatorios para invitados</li>
+          <li>Sets personalizados para novios</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Set 2 — copia exacta para loop CSS -50% -->
+    <div class="service-item">
+      <span class="service-num">01</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_49_53%20a.m..png" alt="Recordatorios para Eventos">
+      <div class="service-content">
+        <h3 class="service-name">Recordatorios para Eventos</h3>
+        <p class="service-desc">Diseñamos y elaboramos recordatorios personalizados para cualquier celebración. Cada uno, único.</p>
+        <ul class="service-items">
+          <li>Baby shower niña y niño</li>
+          <li>Quinceañeras y cumpleaños</li>
+          <li>Matrimonios y bautizos</li>
+          <li>Primeras comuniones</li>
+          <li>Eventos empresariales</li>
+        </ul>
+      </div>
+    </div>
+    <div class="service-item">
+      <span class="service-num">02</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_50_00%20a.m..png" alt="Ambientación para Oficinas">
+      <div class="service-content">
+        <h3 class="service-name">Ambientación para Oficinas</h3>
+        <p class="service-desc">Tu espacio de trabajo merece una buena energía. Velas con aromas y mensajes que inspiran cada día.</p>
+        <ul class="service-items">
+          <li>Mensajes motivacionales</li>
+          <li>Sets corporativos de regalo</li>
+          <li>Ambientación de recepciones</li>
+          <li>Detalles para clientes VIP</li>
+        </ul>
+      </div>
+    </div>
+    <div class="service-item">
+      <span class="service-num">03</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_53_28%20a.m..png" alt="Regalos y Detalles Personalizados">
+      <div class="service-content">
+        <h3 class="service-name">Regalos &amp; Detalles Personalizados</h3>
+        <p class="service-desc">Cajas regalo, desayunos sorpresa y kits especiales armados con amor para decir lo que sientes.</p>
+        <ul class="service-items">
+          <li>Cajas de regalo armadas</li>
+          <li>Desayunos sorpresa a domicilio</li>
+          <li>Kits spa y bienestar</li>
+          <li>Detalles para fechas especiales</li>
+        </ul>
+      </div>
+    </div>
+    <div class="service-item">
+      <span class="service-num">04</span>
+      <img class="service-icon-img" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2011_57_12%20a.m..png" alt="Bodas y Celebraciones Especiales">
+      <div class="service-content">
+        <h3 class="service-name">Bodas &amp; Celebraciones Especiales</h3>
+        <p class="service-desc">Creamos experiencias únicas para los días más importantes de tu vida, con velas y detalles artesanales a medida.</p>
+        <ul class="service-items">
+          <li>Decoración con velas para bodas</li>
+          <li>Centros de mesa artesanales</li>
+          <li>Recordatorios para invitados</li>
+          <li>Sets personalizados para novios</li>
+        </ul>
+      </div>
+    </div>
+
+  </div></div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews-section" id="resenas">
+  <div class="section-header">
+    <p class="section-tag reveal">Lo que dicen nuestros clientes</p>
+    <h2 class="section-h2 reveal">Palabras que nos<br><em style="background:linear-gradient(135deg,var(--rose),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:italic;">llenan el corazón</em></h2>
+    <div class="divider reveal"></div>
+  </div>
+  <div class="reviews-carousel-wrap">
+    <div class="reviews-track" id="reviewsTrack">
+      <div class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Los recordatorios del baby shower de mi niña quedaron hermosísimos. Todas las invitadas me preguntaban dónde los había conseguido. Pedí 40 y quedaron perfectos, igualiticos en detalle."</p><div class="reviewer"><div class="reviewer-dot">MR</div><div class="reviewer-info"><h5>Martha Restrepo</h5><p>El Cerrito, Valle · Baby Shower</p></div></div></div>
+      <div class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Pedí una caja sorpresa para el cumpleaños de mi mamá y quedó divina. La vela olía riquísimo y el mensajito en la tarjeta... mi mamá lloró de la emoción. Vale cada pesito."</p><div class="reviewer"><div class="reviewer-dot">JP</div><div class="reviewer-info"><h5>Jenny Palomino</h5><p>Palmira, Valle · Caja Regalo</p></div></div></div>
+      <div class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Compramos velas para la oficina y para darle a los empleados en diciembre, con el logo de la empresa y todo. Súper profesional el trabajo. Ya tenemos proveedora fija."</p><div class="reviewer"><div class="reviewer-dot">CA</div><div class="reviewer-info"><h5>Carlos Andrade</h5><p>El Cerrito, Valle · Corporativo</p></div></div></div>
+      <div class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Me regalaron un desayuno sorpresa con una vela de Luz de Milagros y no lo podía creer. El aroma era increíble y la presentación muy elegante. Pedí el contacto enseguida."</p><div class="reviewer"><div class="reviewer-dot">VG</div><div class="reviewer-info"><h5>Valentina Guerrero</h5><p>Cali, Valle · Desayuno Sorpresa</p></div></div></div>
+      <div class="review-card"><div class="stars">★★★★★</div><p class="review-text">"Para la quinceañera de mi hija pedimos 60 recordatorios con el diseño que nosotros escogimos. Entregaron a tiempo y con una calidad increíble. Los invitados se los llevaron felices."</p><div class="reviewer"><div class="reviewer-dot">LT</div><div class="reviewer-info"><h5>Luisa Torres</h5><p>Buga, Valle · Quinceañera</p></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contacto">
+
+  <!-- SVG cera derretida superior -->
+  <svg class="contact-wax-top" viewBox="0 0 1440 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,0 L0,30 C80,55 120,20 200,45 C260,62 300,25 380,50 C440,68 480,30 560,48 C630,63 670,28 750,52 C820,70 860,32 940,55 C1010,72 1060,30 1140,50 C1210,67 1270,28 1350,48 L1440,35 L1440,0 Z" fill="#0C0C0C"/>
+  </svg>
+
+  <!-- Gotas decorativas de cera -->
+  <img class="wax-img wax-img-left" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2024%20may%202026%2C%2003_52_25%20p.m..png" alt="">
+  <img class="wax-img wax-img-right" src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2024%20may%202026%2C%2003_52_25%20p.m..png" alt="">
+
+  <div class="contact-inner-wrap">
+    <div class="contact-inner">
+      <div class="reveal-left">
+        <p class="section-tag" style="color:#C1692A;">Encuéntranos</p>
+        <h2 class="contact-h2">Visítanos o<br><em>escríbenos</em></h2>
+        <div class="loc-list">
+          <div class="loc-item"><div class="loc-icon">📍</div><div class="loc-info"><h4>Dirección</h4><p>Calle 3A # 1-122 Villa Cariño<br>El Cerrito, Valle del Cauca</p></div></div>
+          <div class="loc-item"><div class="loc-icon">💬</div><div class="loc-info"><h4>WhatsApp</h4><p><a href="https://wa.me/573168275865" target="_blank">316 827 5865</a></p></div></div>
+          <div class="loc-item"><div class="loc-icon">🕐</div><div class="loc-info"><h4>Atención</h4><p>Lunes a Sábado · 8am – 6pm<br>Domingos por pedido especial</p></div></div>
+          <div class="loc-item"><div class="loc-icon">🚚</div><div class="loc-info"><h4>Envíos</h4><p>El Cerrito, Palmira, Cali y municipios del Valle del Cauca</p></div></div>
+        </div>
+        <a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20hacer%20un%20pedido%20en%20Luz%20de%20Milagros%20🕯️" target="_blank" class="btn-primary" style="margin-top:2rem;">💬 Escríbenos ahora</a>
+      </div>
+      <div class="contact-visual reveal-right">
+        <div class="contact-flame">🕯️</div>
+        <p>El Cerrito, Valle del Cauca</p>
+        <small>Calle 3A # 1-122 Villa Cariño</small>
+        <a class="btn-map" href="https://maps.google.com/?q=El+Cerrito+Valle+del+Cauca+Colombia+Calle+3A+1-122" target="_blank">Ver en Google Maps</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVG cera derretida inferior -->
+  <svg class="contact-wax-bottom" viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <path d="M0,80 L0,45 C70,20 130,58 210,35 C280,15 330,52 410,30 C480,10 540,48 620,28 C690,10 750,50 830,32 C900,15 960,55 1040,35 C1110,17 1170,52 1250,33 C1320,16 1380,48 1440,30 L1440,80 Z" fill="#ffffff"/>
+  </svg>
+
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <!-- Iconos decorativos flotantes -->
+  <div class="cta-deco cta-deco-tl"><img src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/moon_icon.11395d36.png" alt=""></div>
+  <div class="cta-deco cta-deco-tr"><img src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/p59_1.4659672e.png" alt=""></div>
+  <div class="cta-deco cta-deco-bl"><img src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/p59_1.4659672e.png" alt=""></div>
+  <div class="cta-deco cta-deco-br"><img src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/moon_icon.11395d36.png" alt=""></div>
+  <div class="cta-band-inner">
+    <p class="section-tag reveal">¿Ya sabes a quién le vas a alegrar el día?</p>
+    <h2 class="cta-h2 reveal">Tu pedido especial<br>a <em style="font-style:italic">un mensaje</em><br>de distancia</h2>
+    <div class="divider reveal"></div>
+    <p class="reveal">Cuéntanos quién lo va a recibir y nosotras hacemos el resto. Cada vela sale de nuestras manos con un propósito: que quien la reciba, lo sienta.</p>
+    <a href="https://wa.me/573168275865?text=Hola%2C%20quiero%20hacer%20un%20pedido%20en%20Luz%20de%20Milagros%20🕯️" target="_blank" class="btn-primary reveal" style="display:inline-block;">💬 Escribir por WhatsApp</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="https://raw.githubusercontent.com/luzdemilagros/luzdemilagros/main/ChatGPT%20Image%2021%20may%202026%2C%2012_12_01%20p.m..png" alt="Luz de Milagros" onerror="this.style.display='none'">
+  </div>
+  <p class="footer-tagline">"Donde cada llama cuenta una historia"</p>
+  <div class="footer-links">
+    <a href="#productos">Productos</a>
+    <a href="#servicios">Servicios</a>
+    <a href="#resenas">Reseñas</a>
+    <a href="#contacto">Contacto</a>
+    <a href="https://wa.me/573168275865" target="_blank">WhatsApp</a>
+  </div>
+  <div class="footer-bottom"><p>© 2025 Luz de Milagros · El Cerrito, Valle del Cauca · Hecho con 🕯️ y amor artesanal</p></div>
+</footer>
+
+<!-- WhatsApp Float -->
+<a class="wa-float" href="https://wa.me/573168275865?text=Hola%2C%20quiero%20hacer%20un%20pedido%20🕯️" target="_blank" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+// Custom cursor
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+function lerp(a,b,t){return a+(b-a)*t}
+(function loop(){rx=lerp(rx,mx,.12);ry=lerp(ry,my,.12);ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button,.filter-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';ring.style.width='54px';ring.style.height='54px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';ring.style.width='36px';ring.style.height='36px';});
+});
+
+// Sparks
+(function(){
+  const c=document.getElementById('sparks');
+  const colors=['rgba(232,116,138,0.25)','rgba(212,168,83,0.2)','rgba(199,125,255,0.2)','rgba(255,255,255,0.12)'];
+  for(let i=0;i<22;i++){
+    const s=document.createElement('span');
+    const sz=2+Math.random()*9;
+    const col=colors[Math.floor(Math.random()*colors.length)];
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;bottom:${Math.random()*40}%;background:${col};animation-duration:${8+Math.random()*14}s;animation-delay:${Math.random()*12}s;border-radius:50%;`;
+    c.appendChild(s);
+  }
+})();
+
+// Mobile menu
+function toggleMenu(){document.getElementById('mobileMenu').classList.toggle('open')}
+
+// Reveal on scroll
+const obs=new IntersectionObserver(e=>{
+  e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('visible');obs.unobserve(x.target)}})
+},{threshold:0.1});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(r=>obs.observe(r));
+
+// Products filter
+document.getElementById('filterBtns').addEventListener('click',function(e){
+  if(!e.target.classList.contains('filter-btn'))return;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const cat=e.target.dataset.cat;
+  document.querySelectorAll('.product-card').forEach(card=>{
+    card.style.opacity='0';
+    card.style.transform='translateY(20px)';
+    setTimeout(()=>{
+      card.style.display=(cat==='all'||card.dataset.cat===cat)?'':'none';
+      if(cat==='all'||card.dataset.cat===cat){
+        setTimeout(()=>{card.style.opacity='1';card.style.transform='translateY(0)';},50);
+      }
+    },150);
+  });
+});
+document.querySelectorAll('.product-card').forEach(c=>{
+  c.style.transition='opacity .3s ease, transform .3s ease, box-shadow .3s, border-color .3s';
+});
+
+// Carrusel de reseñas — loop infinito sin espacio
+(function(){
+  const track = document.getElementById('reviewsTrack');
+  if(!track) return;
+  const originals = Array.from(track.children);
+  originals.forEach(card => track.appendChild(card.cloneNode(true)));
+
+  let pos = 0;
+  let paused = false;
+  const speed = 0.5;
+
+  function halfWidth(){ return track.scrollWidth / 2; }
+
+  track.addEventListener('mouseenter', () => paused = true);
+  track.addEventListener('mouseleave', () => paused = false);
+
+  function step(){
+    if(!paused){
+      pos += speed;
+      if(pos >= halfWidth()) pos = 0;
+      track.style.transform = `translateX(-${pos}px)`;
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})();
+document.querySelectorAll('.service-item').forEach((item,i)=>{
+  item.style.transitionDelay=`${i*0.12}s`;
+});
+
+// Sticky nav — show after hero
+const hero = document.querySelector('.hero');
+const stickyNav = document.getElementById('stickyNav');
+window.addEventListener('scroll',()=>{
+  if(window.scrollY > hero.offsetHeight * 0.85){
+    stickyNav.classList.add('visible');
+  } else {
+    stickyNav.classList.remove('visible');
+  }
+},{passive:true});
+
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// ── Modal de bienvenida ──
+window.addEventListener('load', function(){
+  const modal = document.getElementById('welcomeModal');
+  setTimeout(() => modal.classList.add('visible'), 500);
+  document.getElementById('welcomeClose').addEventListener('click', () => modal.classList.remove('visible'));
+  document.getElementById('welcomeOverlay').addEventListener('click', () => modal.classList.remove('visible'));
+});
+</script>
+
+<!-- MODAL BIENVENIDA -->
+<div class="welcome-modal" id="welcomeModal">
+  <div class="welcome-overlay" id="welcomeOverlay"></div>
+  <div class="welcome-box">
+    <button class="welcome-close" id="welcomeClose">✕</button>
+    <div class="welcome-flame">🕯️</div>
+    <p class="welcome-tag">Luz de Milagros · El Cerrito, Valle</p>
+    <h2 class="welcome-title">Hola, somos<br><em>Luz de Milagros</em> 👋</h2>
+    <p class="welcome-body">Velas artesanales hechas a mano con amor en El Cerrito, Valle del Cauca. ¿Buscas un regalo único y especial? Estás en el lugar indicado.</p>
+    <div class="welcome-btns">
+      <a href="#productos" class="welcome-btn-primary" onclick="document.getElementById('welcomeModal').classList.remove('visible')">Ver productos</a>
+      <a href="https://wa.me/573168275865" target="_blank" class="welcome-btn-secondary">Hablar con nosotras</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
